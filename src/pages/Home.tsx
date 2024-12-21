@@ -1,66 +1,50 @@
-import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { PageContent, Project } from '../types';
 import { storage } from '../lib/storage';
-import { ProjectCard } from '../components/ProjectCard';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 
 export function Home() {
-  const [content, setContent] = useState<PageContent>(storage.getContent());
+  const [content, setContent] = useState<PageContent | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setContent(storage.getContent());
-    setProjects(storage.getProjects());
+    loadData();
   }, []);
 
+  const loadData = async () => {
+    try {
+      const [contentData, projectsData] = await Promise.all([
+        storage.loadContent(),
+        storage.loadProjects()
+      ]);
+      setContent(contentData);
+      setProjects(projectsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !content) return <div>Loading...</div>;
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900"
-          >
-            {content.hero.title}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6 text-xl text-gray-600 max-w-3xl"
-          >
-            {content.hero.subtitle}
-          </motion.p>
-        </div>
+    <div className="max-w-4xl mx-auto p-6">
+      <section className="mb-12">
+        <h1 className="text-4xl font-bold mb-4">{content.hero.title}</h1>
+        <p className="text-xl text-gray-600">{content.hero.subtitle}</p>
       </section>
 
-      {/* Featured Projects Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Featured Projects</h2>
-            <Link 
-              to="/projects"
-              className="group flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              View all projects
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-            </Link>
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {projects.slice(0, 3).map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </motion.div>
+      <section>
+        <h2 className="text-2xl font-bold mb-6">Projects</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          {projects.map(project => (
+            <div key={project.id} className="border rounded-lg p-4">
+              <img src={project.imageUrl} alt={project.title} className="w-full h-48 object-cover rounded mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
+              <p className="text-gray-600">{project.description}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

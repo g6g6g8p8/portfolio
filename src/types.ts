@@ -3,12 +3,6 @@ export interface Project {
   title: string;
   description: string;
   imageUrl: string;
-  gallery: {
-    type: 'image' | 'video';
-    url: string;
-  }[];
-  year: string;
-  client: string;
   categories: string[];
 }
 
@@ -18,19 +12,12 @@ export interface PageContent {
     subtitle: string;
   };
   about: {
-    intro: string[];
-    highlights: string[];
-    experience: {
+    content: string;
+    experience: Array<{
       role: string;
       company: string;
       period: string;
-    }[];
-    skills: string[];
-    clients: string[];
-    awards: {
-      project: string;
-      items: string[];
-    }[];
+    }>;
   };
 }
 
