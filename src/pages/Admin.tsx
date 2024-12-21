@@ -3,6 +3,29 @@ import { Project, PageContent, PROJECT_CATEGORIES } from '../types';
 import { storage } from '../lib/storage';
 import { Plus, Save, Upload, X } from 'lucide-react';
 
+interface Experience {
+  role: string;
+  company: string;
+  period: string;
+}
+
+interface AboutContent {
+  intro: string[];
+  highlights: string[];
+  experience: Array<{
+    role: string;
+    company: string;
+    period: string;
+  }>;
+  skills: string[];
+  clients: string[];
+  awards: Array<{
+    project: string;
+    items: string[];
+  }>;
+  description?: string;
+}
+
 export function Admin() {
   const [content, setContent] = useState<PageContent>(storage.getContent());
   const [projects, setProjects] = useState<Project[]>(storage.getProjects());
@@ -81,6 +104,31 @@ export function Admin() {
     setProjects(newProjects);
   };
 
+  const handleExperienceChange = (index: number, field: keyof Experience, value: string) => {
+    const newExperience = [...content.about.experience];
+    newExperience[index] = {
+      ...newExperience[index],
+      [field]: value
+    };
+    setContent({
+      ...content,
+      about: {
+        ...content.about,
+        experience: newExperience
+      }
+    });
+  };
+
+  const handleAddExperience = () => {
+    setContent({
+      ...content,
+      about: {
+        ...content.about,
+        experience: [...content.about.experience, { role: '', company: '', period: '' }]
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen px-4">
       <div className="max-w-site mx-auto">
@@ -128,10 +176,10 @@ export function Admin() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">About Content</label>
               <textarea
-                value={content.about.content}
+                value={content.about.description || ''}
                 onChange={(e) => setContent({
                   ...content,
-                  about: { ...content.about, content: e.target.value }
+                  about: { ...content.about, description: e.target.value }
                 })}
                 rows={4}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 dark:text-white p-2"
@@ -142,44 +190,26 @@ export function Admin() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience Items</label>
               <div className="space-y-2">
                 {content.about.experience.map((item, index) => (
-                  <div key={index} className="flex gap-2">
+                  <div key={index}>
                     <input
-                      type="text"
-                      value={item}
-                      onChange={(e) => {
-                        const newExperience = [...content.about.experience];
-                        newExperience[index] = e.target.value;
-                        setContent({
-                          ...content,
-                          about: { ...content.about, experience: newExperience }
-                        });
-                      }}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 dark:text-white p-2"
+                      value={item.role}
+                      onChange={(e) => handleExperienceChange(index, 'role', e.target.value)}
+                      placeholder="Role"
                     />
-                    <button
-                      onClick={() => {
-                        const newExperience = content.about.experience.filter((_, i) => i !== index);
-                        setContent({
-                          ...content,
-                          about: { ...content.about, experience: newExperience }
-                        });
-                      }}
-                      className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg"
-                    >
-                      <X size={20} />
-                    </button>
+                    <input
+                      value={item.company}
+                      onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
+                      placeholder="Company"
+                    />
+                    <input
+                      value={item.period}
+                      onChange={(e) => handleExperienceChange(index, 'period', e.target.value)}
+                      placeholder="Period"
+                    />
                   </div>
                 ))}
                 <button
-                  onClick={() => {
-                    setContent({
-                      ...content,
-                      about: {
-                        ...content.about,
-                        experience: [...content.about.experience, '']
-                      }
-                    });
-                  }}
+                  onClick={handleAddExperience}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
                 >
                   <Plus size={16} /> Add Experience Item
