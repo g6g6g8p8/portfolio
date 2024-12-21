@@ -23,7 +23,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
         <div className="mt-4">
           <h3 className="text-lg font-medium text-gray-900">{project.title}</h3>
-          <p className="mt-1 text-sm text-gray-500">{project.client} • {project.year}</p>
+          <p className="mt-1 text-sm text-gray-500">{project.description}</p>
           {project.categories.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {project.categories.map((category) => (

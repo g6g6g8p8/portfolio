@@ -7,9 +7,15 @@ import { X } from 'lucide-react';
 export function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setProjects(storage.getProjects());
+    const loadProjects = async () => {
+      const data = await storage.loadProjects();
+      setProjects(data);
+      setLoading(false);
+    };
+    loadProjects();
   }, []);
 
   const toggleCategory = (category: string) => {
@@ -25,13 +31,14 @@ export function Projects() {
     project.categories.some(category => selectedCategories.includes(category))
   );
 
+  if (loading) return <div>Loading...</div>;
+
   return (
     <div className="min-h-screen px-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-8 mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Projects</h1>
+          <h1 className="text-4xl font-bold">Projects</h1>
           
-          {/* Category Filters */}
           <div className="flex flex-wrap gap-2">
             {PROJECT_CATEGORIES.map((category) => (
               <button
@@ -39,8 +46,8 @@ export function Projects() {
                 onClick={() => toggleCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
                   ${selectedCategories.includes(category)
-                    ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
               >
                 {category}
@@ -49,7 +56,7 @@ export function Projects() {
             {selectedCategories.length > 0 && (
               <button
                 onClick={() => setSelectedCategories([])}
-                className="px-4 py-2 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 flex items-center gap-1"
+                className="px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-600 hover:bg-red-200 flex items-center gap-1"
               >
                 <X size={14} />
                 Clear filters
@@ -66,7 +73,7 @@ export function Projects() {
 
         {filteredProjects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">No projects found for the selected categories.</p>
+            <p className="text-gray-500">No projects found for the selected categories.</p>
           </div>
         )}
       </div>
